@@ -81,6 +81,7 @@ class CommonAPIClient:
                             else:
                                 response_json = await response.json()
                                 logger.debug(f"Successfully completed request to {path}")
+                                logger.debug(f"Test yogini {response_json}")
                                 return response_json
             except Exception as e:
                 # Log with request ID if we have one
