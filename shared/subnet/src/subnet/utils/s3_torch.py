@@ -54,8 +54,18 @@ async def download_tensor(
                 raise
 
         except Exception as e:
-            logger.error(f"Error downloading tensor: {e}")
-            raise
+            if attempt < max_retries:
+                delay = 2**attempt
+                logger.warning(
+                    f"Retryable error (HTTP {e}), retrying in {delay}s... (attempt {attempt + 1}/{max_retries + 1})"
+                )
+                await asyncio.sleep(delay)
+                continue
+            else:
+                logger.warning(
+                    f"Server error (HTTP {e}) downloading tensor from R2: {e}. Failed after {max_retries + 1} attempts. This is likely a temporary R2 issue."
+                )
+                raise
 
 
 async def download_weights_or_optimizer_state(

@@ -135,21 +135,18 @@ async def download_file(presigned_url: str, max_retries: int = 3):
                 logger.error(f"HTTP error downloading file: {e}")
                 raise
         except Exception as e:
-            if e.status >= 500 or e.status == 429:
-                if attempt < max_retries:
-                    delay = 2**attempt
-                    logger.warning(
-                        f"Retryable error (HTTP {e.status}), retrying in {delay}s... (attempt {attempt + 1}/{max_retries + 1})"
-                    )
-                    await asyncio.sleep(delay)
-                    continue
-                else:
-                    logger.warning(
-                        f"Server error (HTTP {e.status}) downloading file from R2: {e}. Failed after {max_retries + 1} attempts. This is likely a temporary R2 issue."
-                    )
-                    raise
+            if attempt < max_retries:
+                delay = 2**attempt
+                logger.warning(
+                    f"Retryable error (HTTP {e}), retrying in {delay}s... (attempt {attempt + 1}/{max_retries + 1})"
+                )
+                await asyncio.sleep(delay)
+                continue
             else:
-                logger.error(f"HTTP error downloading file: {e}")
+                logger.warning(
+                    f"Server error (HTTP {e}) downloading file from R2: {e}. Failed after {max_retries + 1} attempts. This is likely a temporary R2 issue."
+                )
                 raise
+            
             #logger.error(f"Error downloading file from presigned URL: {e}")
             #raise
